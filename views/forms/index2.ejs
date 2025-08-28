@@ -1,0 +1,54 @@
+<!-- views/forms/index.ejs -->
+<!-- Purpose: Index page that lists all active forms from MongoDB. -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('../partials/head') %>
+  </head>
+  <body class="page-index-2">
+    <h1><%= title %></h1>
+
+    <p>
+      <a href="/"> Home </a> |
+      <a href="/new">
+        <br>+ Create New Form</a>
+    </p>
+    <br>
+
+    <% if (!forms || forms.length === 0) { %>
+    <p>No forms yet. Create one to get started.</p>
+    <% } else { %>
+    
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Rank</th>
+          <th>Belt</th>
+          <th>Category</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% forms.forEach(f => { %>
+        <tr>
+          <td><%= f.name %></td>
+          <td><%= f.rankType %> <%= f.rankNumber %></td>
+          <td><%= f.beltColor || '-' %></td>
+          <td><%= f.category %></td>
+          <td><%= new Date(f.createdAt).toLocaleDateString() %></td>
+          <td>
+            <!-- TODO: wire these routes next -->
+            <a href="/forms/<%= f._id %>">Show</a> |
+            <a href="/forms/<%= f._id %>/edit">Edit</a>
+            <!-- Delete will be a form with method-override later -->
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %> <%- include('../partials/footer') %>
+  </body>
+</html>

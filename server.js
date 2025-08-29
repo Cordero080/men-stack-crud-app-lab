@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
   res.render("index", { title: "Martial Arts Forms App" });
 });
 
-// mount routes for the forms resource
+// mount routes for the forms resource (NO '/forms' prefix here)
 app.use(formsRouter);
 
 // start

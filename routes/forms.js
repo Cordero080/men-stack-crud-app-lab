@@ -1,37 +1,72 @@
-// routes/forms.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Form = require('../models/Form');
+const Form = require("../models/Form");
 
-// helper for /new dropdown
+// helper for /forms/new dropdown (alive only)
 async function getNameList() {
-  const docs = await Form.find({}).sort({ name: 1 }).select('name -_id');
-  return docs.map(d => d.name);
+  const docs = await Form.find({ deletedAt: null })
+    .sort({ name: 1 })
+    .select("name -_id");
+  return docs.map((d) => d.name);
+}
+
+function formatErrors(err) {
+  return Object.fromEntries(
+    Object.entries(err.errors || {}).map(([k, v]) => [k, v.message])
+  );
 }
 
 /* CREATE */
-// /new
-router.get('/new', async (req, res) => {
+// GET /forms/new
+router.get("/forms/new", async (req, res) => {
   try {
     const names = await getNameList();
-    res.render('new', { title: 'Add New Martial Arts Form', names });
-  } catch (e) {
-    res.render('new', { title: 'Add New Martial Arts Form', names: [] });
+    res.render("new", {
+      title: "Add New Martial Arts Form",
+      names,
+      error: null,
+      errors: {},
+      formData: {},
+    });
+  } catch {
+    res.render("new", {
+      title: "Add New Martial Arts Form",
+      names: [],
+      error: null,
+      errors: {},
+      formData: {},
+    });
   }
 });
 
 // POST /forms
-router.post('/forms', async (req, res) => {
+router.post("/forms", async (req, res, next) => {
   try {
-    const { name, rankType, rankNumber, beltColor, category, description, referenceUrl } = req.body;
+    const {
+      name,
+      rankType,
+      rankNumber,
+      beltColor,
+      category,
+      description,
+      referenceUrl,
+      learned,
+    } = req.body;
 
-    // friendly duplicate check
-    const exists = await Form.exists({ name, rankType, rankNumber: Number(rankNumber) });
+    // Optional friendly duplicate check
+    const exists = await Form.exists({
+      name,
+      rankType,
+      rankNumber: Number(rankNumber),
+      deletedAt: null, // consider only alive docs
+    });
     if (exists) {
       const names = await getNameList();
-      return res.status(400).render('new', {
-        title: 'Add New Martial Arts Form',
-        error: 'That form already exists for this rank.',
+      return res.status(400).render("new", {
+        title: "Add New Martial Arts Form",
+        error: "That form already exists for this rank.",
+        errors: {},
+        formData: req.body,
         names,
       });
     }
@@ -41,62 +76,89 @@ router.post('/forms', async (req, res) => {
       rankType,
       rankNumber: Number(rankNumber),
       beltColor: beltColor || undefined,
-      category: category || 'Kata',
-      description: description || '',
+      category: category || "Kata",
+      description: description || "",
       referenceUrl: referenceUrl || undefined,
-      learned: false,
+      learned: learned === "on",
     });
 
-    res.redirect('/forms');
+    res.redirect("/forms");
   } catch (err) {
-    const names = await getNameList();
-    res.status(400).render('new', {
-      title: 'Add New Martial Arts Form',
-      error: err.code === 11000 ? 'Duplicate: that name/rank combo already exists.' : err.message,
-      names,
-    });
+    if (err.name === "ValidationError") {
+      const names = await getNameList();
+      return res.status(400).render("new", {
+        title: "Add New Martial Arts Form",
+        error: null,
+        errors: formatErrors(err),
+        formData: req.body,
+        names,
+      });
+    }
+    next(err);
   }
 });
 
 /* READ */
-// GET /forms
-router.get('/forms', async (_req, res) => {
+// GET /forms  (alive only)
+router.get("/forms", async (_req, res) => {
   try {
-    const forms = await Form.find({}).sort({ rankType: 1, rankNumber: 1, name: 1 });
-    res.render('forms/index2', { title: 'All Forms', forms });
+    const forms = await Form.find({ deletedAt: null }).sort({
+      rankType: 1,
+      rankNumber: 1,
+      name: 1,
+    });
+    res.render("forms/index2", { title: "All Forms", forms });
   } catch {
-    res.status(500).send('Failed to load forms');
+    res.status(500).send("Failed to load forms");
   }
 });
 
-// GET /forms/:id
-router.get('/forms/:id', async (req, res) => {
+// GET /forms/trash  (soft-deleted only)
+router.get("/forms/trash", async (req, res) => {
   try {
-    const form = await Form.findById(req.params.id);
-    if (!form) return res.status(404).send('Form not found');
-    res.render('forms/show', { title: form.name, form });
+    const forms = await Form.find({ deletedAt: { $ne: null } }).sort({
+      updatedAt: -1,
+    });
+    res.render("forms/trash", { title: "Trash", forms });
   } catch {
-    res.status(404).send('Form not found');
+    res.status(500).send("Failed to load trash");
   }
 });
 
 /* UPDATE */
-// GET /forms/:id/edit
-router.get('/forms/:id/edit', async (req, res) => {
+// GET /forms/:id/edit   (block editing trashed)
+router.get("/forms/:id/edit", async (req, res) => {
   try {
     const form = await Form.findById(req.params.id);
-    if (!form) return res.status(404).send('Form not found');
-    res.render('forms/edit', { title: `Edit: ${form.name}`, form });
+    if (!form || form.deletedAt)
+      return res.status(404).send("Form not found");
+    res.render("forms/edit", {
+      title: `Edit: ${form.name}`,
+      form,
+      error: null,
+      errors: {},
+      formData: {},
+    });
   } catch {
-    res.status(404).send('Form not found');
+    res.status(404).send("Form not found");
   }
 });
 
 // PUT /forms/:id
-router.put('/forms/:id', async (req, res) => {
+router.put("/forms/:id", async (req, res, next) => {
   try {
-    const { name, rankType, rankNumber, beltColor, category, description, referenceUrl, learned } = req.body;
-    await Form.findByIdAndUpdate(
+    const {
+      name,
+      rankType,
+      rankNumber,
+      beltColor,
+      category,
+      description,
+      referenceUrl,
+      learned,
+    } = req.body;
+
+    const doc = await Form.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
@@ -104,28 +166,74 @@ router.put('/forms/:id', async (req, res) => {
           rankType,
           rankNumber: Number(rankNumber),
           beltColor: beltColor || undefined,
-          category: category || 'Kata',
-          description: description || '',
+          category: category || "Kata",
+          description: description || "",
           referenceUrl: referenceUrl || undefined,
-          learned: learned === 'on',
+          learned: learned === "on",
         },
       },
       { new: true, runValidators: true }
     );
+
+    if (!doc || doc.deletedAt) return res.status(404).send("Form not found");
     res.redirect(`/forms/${req.params.id}`);
-  } catch {
-    res.status(400).send('Failed to update form');
+  } catch (err) {
+    if (err.name === "ValidationError") {
+      const form = await Form.findById(req.params.id);
+      return res.status(400).render("forms/edit", {
+        title: `Edit: ${form?.name || "Form"}`,
+        form,
+        error: null,
+        errors: formatErrors(err),
+        formData: req.body,
+      });
+    }
+    next(err);
   }
 });
 
-/* DELETE (hard) */
-// DELETE /forms/:id
-router.delete('/forms/:id', async (req, res) => {
+/* DELETE */
+// DELETE /forms/:id  → SOFT delete by default, HARD delete if ?hard=1
+router.delete("/forms/:id", async (req, res) => {
   try {
-    await Form.findByIdAndDelete(req.params.id);
-    res.redirect('/forms');
+    const hard = req.query.hard === "1" || req.body.hard === "1";
+    if (hard) {
+      await Form.deleteOne({ _id: req.params.id });
+      return res.redirect("/forms/trash");
+    }
+    await Form.updateOne(
+      { _id: req.params.id },
+      { $set: { deletedAt: new Date() } }
+    );
+    res.redirect("/forms");
   } catch {
-    res.status(400).send('Failed to delete form');
+    res.status(400).send("Failed to delete form");
+  }
+});
+
+// POST /forms/:id/restore  (undo soft delete)
+router.post("/forms/:id/restore", async (req, res) => {
+  try {
+    await Form.updateOne(
+      { _id: req.params.id },
+      { $set: { deletedAt: null } }
+    );
+    res.redirect("/forms/trash");
+  } catch {
+    res.status(400).send("Failed to restore form");
+  }
+});
+
+/* SHOW — MUST BE LAST */
+// GET /forms/:id   (hide trashed)
+router.get("/forms/:id", async (req, res) => {
+  try {
+    const form = await Form.findById(req.params.id);
+    if (!form || form.deletedAt)
+      return res.status(404).send("Form not found");
+    res.render("forms/show", { title: form.name, form });
+  } catch {
+    res.status(404).send("Form not found");
   }
 });
 

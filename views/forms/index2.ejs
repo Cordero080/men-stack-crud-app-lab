@@ -6,19 +6,12 @@
     <%- include('../partials/head') %>
   </head>
   <body class="page-index-2">
+    <%- include('../partials/nav') %>
     <h1><%= title %></h1>
-
-    <p>
-      <a href="/"> Home </a> |
-      <a href="/new">
-        <br>+ Create New Form</a>
-    </p>
-    <br>
 
     <% if (!forms || forms.length === 0) { %>
     <p>No forms yet. Create one to get started.</p>
     <% } else { %>
-    
 
     <table>
       <thead>
@@ -40,15 +33,51 @@
           <td><%= f.category %></td>
           <td><%= new Date(f.createdAt).toLocaleDateString() %></td>
           <td>
-            <!-- TODO: wire these routes next -->
             <a href="/forms/<%= f._id %>">Show</a> |
-            <a href="/forms/<%= f._id %>/edit">Edit</a>
-            <!-- Delete will be a form with method-override later -->
+            <a href="/forms/<%= f._id %>/edit">Edit</a> |
+            <a href="#" class="delete-link" data-id="<%= f._id %>">Delete</a>
+            <form
+              id="del-<%= f._id %>"
+              action="/forms/<%= f._id %>?_method=DELETE"
+              method="POST"
+              style="display: none"
+            ></form>
           </td>
         </tr>
         <% }) %>
       </tbody>
     </table>
-    <% } %> <%- include('../partials/footer') %>
+    <% } %>
+
+    <!-- Delete confirmation overlay -->
+    <div id="delete-overlay" class="delete-overlay" style="display: none">
+      <div class="delete-dialog">
+        <div class="delete-dialog-title">Delete this form?</div>
+        <button id="confirm-delete-btn" class="delete-btn">Delete</button>
+        <button id="cancel-delete-btn" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+
+    <script>
+      let deleteFormId = null;
+      document.querySelectorAll(".delete-link").forEach((link) => {
+        link.addEventListener("click", function (e) {
+          e.preventDefault();
+          deleteFormId = this.getAttribute("data-id");
+          document.getElementById("delete-overlay").style.display = "flex";
+        });
+      });
+      document.getElementById("cancel-delete-btn").onclick = function () {
+        document.getElementById("delete-overlay").style.display = "none";
+        deleteFormId = null;
+      };
+      document.getElementById("confirm-delete-btn").onclick = function () {
+        if (deleteFormId) {
+          document.getElementById("del-" + deleteFormId).submit();
+        }
+      };
+    </script>
+
+    <%- include('../partials/footer') %>
   </body>
 </html>

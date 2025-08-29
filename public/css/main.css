@@ -124,12 +124,12 @@ font-style: normal;
 }
 
 .home {
-  margin: 150px auto;
+  margin: 180px auto;
   padding: 36px 28px 44px 28px;
   max-width: 700px;
-  min-height: 740px;
+  min-height: 840px;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 60px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
@@ -150,11 +150,12 @@ font-style: normal;
 
 .home h1 {
   margin-bottom: 22px;
+  
 }
 
 .home p {
-  margin-bottom: 18px;
-  font-size: 1.18rem;
+  margin-bottom: 8px;
+  font-size:1.18rem;
 }
 
 
@@ -442,8 +443,8 @@ button:hover {
   display: flex;
   justify-content: center;
   gap: 0.2em;
-  font-size: 3rem;
-  margin-top: 2em;
+  font-size: 3.1rem;
+  margin-top: 1.7em;
   position: relative;
   perspective: 1800px; /* More perspective for stronger foreshortening */
 }
@@ -510,4 +511,66 @@ button:hover {
       rotate3d(0,0,0,0deg)
       scale3d(1,1,1);
   }
+}
+
+/* Delete confirmation overlay styles */
+.delete-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 20, 40, 0.72); /* deep blue overlay */
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.delete-dialog {
+  background: linear-gradient(135deg, #23223a 60%, #ffb300 100%); /* dark blue to gold */
+  color: #fff;
+  padding: 2em 2.5em;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px #000a;
+  min-width: 280px;
+  text-align: center;
+  border: 2px solid #00c3ff; /* accent cyan border */
+}
+.delete-dialog-title {
+  font-size: 1.25em;
+  margin-bottom: 1.2em;
+  color: #ffb300;
+  letter-spacing: 1px;
+}
+.delete-btn {
+  background: linear-gradient(90deg, #ffb300 0%, #d7263d 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5em 1.5em;
+  margin-right: 1em;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px #0002;
+}
+.delete-btn:hover {
+  background: linear-gradient(90deg, #d7263d 0%, #ffb300 100%);
+  box-shadow: 0 4px 16px #d7263d44;
+}
+.cancel-btn {
+  background: #23223a;
+  color: #00c3ff;
+  border: 1.5px solid #00c3ff;
+  border-radius: 6px;
+  padding: 0.5em 1.5em;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.cancel-btn:hover {
+  background: #00c3ff;
+  color: #23223a;
+  border: 1.5px solid #ffb300;
 }

@@ -3,12 +3,12 @@
 document.addEventListener("DOMContentLoaded", function () {
   const beltColors = {
     white: "#fff",
-   
-    orange:"#c47e14ff" ,
-    green:"#28a745",
-   
+
+    orange: "#c47e14ff",
+    green: "#28a745",
+
     purple: "#7e4bdcff",
-    brown: "#855830ff" ,
+    brown: "#855830ff",
     black: "#050505ff",
   };
 
@@ -31,5 +31,31 @@ document.addEventListener("DOMContentLoaded", function () {
     nameSelect.addEventListener("change", (e) => {
       nameInput.value = e.target.value || "";
     });
+  }
+
+  // Hard Delete overlay logic for trash.ejs
+  let hardDeleteFormId = null;
+  const hardDeleteLinks = document.querySelectorAll(".hard-delete-link");
+  const hardDeleteOverlay = document.getElementById("hard-delete-overlay");
+  const confirmHardDeleteBtn = document.getElementById("confirm-hard-delete-btn");
+  const cancelHardDeleteBtn = document.getElementById("cancel-hard-delete-btn");
+
+  if (hardDeleteLinks.length && hardDeleteOverlay && confirmHardDeleteBtn && cancelHardDeleteBtn) {
+    hardDeleteLinks.forEach((link) => {
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        hardDeleteFormId = this.getAttribute("data-id");
+        hardDeleteOverlay.style.display = "flex";
+      });
+    });
+    cancelHardDeleteBtn.onclick = function () {
+      hardDeleteOverlay.style.display = "none";
+      hardDeleteFormId = null;
+    };
+    confirmHardDeleteBtn.onclick = function () {
+      if (hardDeleteFormId) {
+        document.getElementById("hard-del-" + hardDeleteFormId).submit();
+      }
+    };
   }
 });

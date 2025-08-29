@@ -1,0 +1,30 @@
+{
+  "workbench.colorCustomizations": {
+    "terminal.background": "#2b06822b",
+    "titleBar.activeForeground": "#3d8def",
+    "titleBar.activeBackground": "#051334e6",
+    "titleBar.inactiveForeground": "#e7d4ea",
+    "titleBar.inactiveBackground": "#115eed",
+    "statusBar.noFolderForeground": "#F2E9E4",
+    "statusBar.noFolderBackground": "#22223B",
+    "terminal.integrated.fontFamily": "Future Z",
+    "terminal.foreground": "#7b3ad1",
+    "terminalCursor.foreground": "#d50e7896",
+    "terminalCursor.background": "#06f682",
+    "titleBar.border": "#7410d8a6",
+    "activityBar.background": "#07034d40",
+    "activityBar.border": "#03093c",
+    "activityBar.foreground": "#d719d1",
+    "activityBar.inactiveForeground": "#c20a8bc5",
+    "activityBar.activeBorder": "#9d24f4b6",
+    "activityBar.activeBackground": "#0e0220ce",
+    "statusBar.border": "#22223B",
+    "statusBarItem.hoverBackground": "#0b0011",
+    "statusBarItem.remoteForeground": "#FF6F61",
+    "statusBarItem.remoteBackground": "#233D4D",
+    "statusBar.debuggingForeground": "#F2E9E4",
+    "statusBar.debuggingBackground": "#FF6F61",
+    "activityBarBadge.foreground": "#F2E9E4",
+    "activityBarBadge.background": "#FF6F61"
+  }
+}

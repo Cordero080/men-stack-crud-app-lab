@@ -84,6 +84,18 @@ router.post("/forms", async (req, res, next) => {
 
     res.redirect("/forms");
   } catch (err) {
+    // 🔽 NEW: catch DB unique index violations (race-safe duplicate guard)
+    if (err && err.code === 11000) {
+      const names = await getNameList();
+      return res.status(400).render("new", {
+        title: "Add New Martial Arts Form",
+        error: "That form already exists for this rank.",
+        errors: {},
+        formData: req.body,
+        names,
+      });
+    }
+
     if (err.name === "ValidationError") {
       const names = await getNameList();
       return res.status(400).render("new", {
@@ -157,7 +169,24 @@ router.put("/forms/:id", async (req, res, next) => {
       referenceUrl,
       learned,
     } = req.body;
-
+ //===============  ✅PREVENT DUPLICATS GUARD✅ ==================\\
+const exists = await Form.exists({
+  _id: { $ne: req.params.id },
+  name, 
+  rankType,
+  rankNumber: Number(rankNumber),
+  deletedAt: null,
+});
+if (exists) {
+  const form = await Form.findById(req.params.id);
+  return res.status(400).render('forms/edit', {
+    title: `Edit: ${from?.name || "Form"}`,
+    form,
+    error: "That form already exists for this rank.",
+    errors: {},
+    formData: req.body,
+  });
+}
     const doc = await Form.findByIdAndUpdate(
       req.params.id,
       {

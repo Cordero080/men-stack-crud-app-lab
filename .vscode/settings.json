@@ -9,8 +9,7 @@
     "titleBar.inactiveBackground": "#115eed",
     "statusBar.noFolderForeground": "#F2E9E4",
     "statusBar.noFolderBackground": "#22223B",
-    "terminal.integrated.fontFamily": "Future Z",
-    "terminal.foreground": "#7b3ad1",
+    "terminal.integrated.fontFamily": "Orbitron",
     "terminalCursor.foreground": "#d50e7896",
     "terminalCursor.background": "#06f682",
     "titleBar.border": "#7410d8a6",
@@ -27,6 +26,7 @@
     "statusBar.debuggingForeground": "#F2E9E4",
     "statusBar.debuggingBackground": "#FF6F61",
     "activityBarBadge.foreground": "#F2E9E4",
-    "activityBarBadge.background": "#d261ff"
+    "activityBarBadge.background": "#d261ff",
+    "terminal.foreground": "#7b3ad1"
   }
 }

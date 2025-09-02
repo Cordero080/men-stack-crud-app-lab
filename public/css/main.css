@@ -62,12 +62,16 @@ a:hover {
 .description-block {
   white-space: pre-line;
   word-break: break-word;
-  max-width: 720px;
+  width: calc(100% + 280px);
+  max-width: none;
   padding: 8px 0;
+  margin-right: -140px;
+  margin-left: -140px;
+  box-sizing: border-box;
   font-family: inherit;
   font-size: 1.1em;
   max-height: 480px;      /* or any height you prefer */
-  overflow: auto;
+  overflow:auto
   /* ...existing styles... */
 }
 
@@ -177,7 +181,7 @@ font-style: normal;
 
 /* Forms */
 form {
-  max-width: 500px;
+  max-width: 720px;
   padding: 15px;
   background-color: #fff;
     background:
@@ -262,7 +266,7 @@ button:hover {
 .page-index-2 {
   margin: 32px auto;
   padding: 32px 24px 40px 24px;
-  max-width: 1500px;
+  max-width: 1000px;
   background:
     radial-gradient(ellipse at 120% 90%, oklch(67.191% 0.15632 241.294 / 0.18) 80%, transparent 70%),
     radial-gradient(ellipse at 80% 70%, oklch(76.709% 0.1508 228.96 / 0.532) 0%, transparent 70%),
@@ -322,7 +326,7 @@ button:hover {
 .page-show {
   margin: 36px auto;
   padding: 32px 24px 40px 24px;
-  max-width: 700px;
+  max-width: 900px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.09);
@@ -346,8 +350,9 @@ button:hover {
   margin-bottom: 28px;
 }
 .page-show th, .page-show td {
-  padding: 10px 14px;
-  text-align: left;
+  padding: 10px 140px;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .page-show tr {

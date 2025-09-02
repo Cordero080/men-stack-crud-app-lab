@@ -34,7 +34,12 @@ h1 {
   font-size: 2.13rem;
   margin-bottom: 15px;
 }
+ .h1-new {
 
+  padding-top: 40px;
+  font-size: 1.9rem;
+  padding-left: 8px;
+}
 a,
 a:visited,
 a:active,
@@ -217,7 +222,7 @@ button {
   border-radius: 4px;
 }
 textarea {
-  min-height: 100px;
+  min-height: 160px;
   resize: vertical;
   font-size: 1.1rem;
   line-height: 1.5;
@@ -303,6 +308,7 @@ button:hover {
 
 /* new form page spacing */
 .page-new {
+  
   margin: 40px;
     background:
     radial-gradient(ellipse at 120% 90%, rgba(6, 159, 236, 0.18) 80%, transparent 70%),

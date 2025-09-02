@@ -1,131 +1,168 @@
 <!-- views/new.ejs -->
-<!-- Purpose: “New” form page; uses shared head/footer and posts to /forms (CREATE). -->
+<!-- Purpose: “New” form page; two-column layout with CREATE form (left) and reference (right). -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <%- include('partials/head') %>
+    <!-- Chart / reference panel styles -->
+    <link rel="stylesheet" href="/css/chart.css">
   </head>
+
   <body class="page-new">
     <%- include('partials/nav') %>
-    <h1><%= title %></h1>
 
-    <% if (typeof error !== 'undefined') { %>
-    <p class="error"><%= error %></p>
+    <h1 class="h1-new"><%= title %></h1>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <p class="error"><%= error %></p>
     <% } %>
 
-    
+    <!-- ===== Two-column layout ===== -->
+    <div class="new-layout">
+      <!-- LEFT: Create Form -->
+      <section class="new-left">
+        <form action="/forms" method="POST">
+          <!-- Existing names helper -->
+          <label class="input" for="nameSelect">Choose existing form :</label>
+          <select id="nameSelect" name="nameSelect">
+            <option value="">-- choose or type below --</option>
+            <% (names || []).forEach(n => { %>
+              <option value="<%= n %>"><%= n %></option>
+            <% }) %>
+          </select>
 
-    <form action="/forms" method="POST">
-      <!-- Optional: existing names dropdown (populated by /new route if provided) -->
-      <label class="input" for="nameSelect">Choose existing form :</label>
-      <select id="nameSelect" name="nameSelect">
-        <option value="">-- choose or type below --</option>
-        <% (names || []).forEach(n => { %>
-        <option value="<%= n %>"><%= n %></option>
-        <% }) %>
-      </select>
-<!-- Name -->
-      <label for="name">Form Name:</label>
-      <input type="text" id="name" name="name" required />
-      <% if (errors && errors.name) { %><small class="error"><%= errors.name %></small><% } %>
+          <!-- Name -->
+          <label for="name">Form/Kata Name:</label>
+          <input type="text" id="name" name="name" required />
+          <% if (errors && errors.name) { %><small class="error"><%= errors.name %></small><% } %>
 
-<!-- Rank Type -->
-      <label for="rankType">Rank Type:</label>
-      
-      <select id="rankType" name="rankType" required>
-        <option value="Kyu">Kyu/Level</option>
-        <option value="Dan">Dan/Degree</option>
-      </select>
-      <% if (errors && errors.rankType) { %><small class="error"><%= errors.rankType %></small><% } %>
+          <!-- Rank Type -->
+          <label for="rankType">Rank Type:</label>
+          <select id="rankType" name="rankType" required>
+            <option value="Kyu">Kyu/Level</option>
+            <option value="Dan">Dan/Degree</option>
+          </select>
+          <% if (errors && errors.rankType) { %><small class="error"><%= errors.rankType %></small><% } %>
 
-<!-- Rank Number -->
+          <!-- Rank Number -->
+          <label for="rankNumber">Rank Number:</label>
+          <input type="number" id="rankNumber" name="rankNumber" min="1" required />
+          <% if (errors && errors.rankNumber) { %><small class="error"><%= errors.rankNumber %></small><% } %>
 
-      <label for="rankNumber">Rank Number:</label>
-      <input type="number" id="rankNumber" name="rankNumber" min="1" required />
-      <% if (errors && errors.rankNumber) { %><small class="error"><%= errors.rankNumber %></small><% } %>
+          <!-- Belt Color (label tints via main.js) -->
+          <label for="beltColor" id="beltLabel">Belt Color</label>
+          <select id="beltColor" name="beltColor">
+            <option value="white">White</option>
+            <option value="orange">Orange</option>
+            <option value="green">Green</option>
+            <option value="purple">Purple</option>
+            <option value="brown">Brown</option>
+            <option value="black">Black</option>
+          </select>
 
-      <label for="beltColor" id="beltLabel">Belt Color</label>
-      <select id="beltColor" name="beltColor">
-        <option value="white">White</option>
-        <option value="orange">Orange</option>
-        <option value="green">Green</option>
-        <option value="purple">Purple</option>
-        <option value="brown">Brown</option>
-        <option value="black">Black</option>
-      </select>
-      
+          <!-- Category -->
+          <label for="category">Category:</label>
+          <select id="category" name="category">
+            <option value="Kata">Kata</option>
+            <option value="Bunkai">Bunkai</option>
+            <option value="Kumite">Kumite</option>
+            <option value="Weapon">Weapon</option>
+            <option value="Other">Other</option>
+          </select>
+          <% if (errors && errors.category) { %><small class="error"><%= errors.category %></small><% } %>
 
-<!-- Category -->
-      <label for="category">Category:</label>
-      <select id="category" name="category">
-        <option value="Kata">Kata</option>
-        <option value="Bunkai">Bunkai</option>
-        <option value="Kumite">Kumite</option>
-        <option value="Weapon">Weapon</option>
-        <option value="Other">Other</option>
-      </select>
-      <% if (errors && errors.category) { %><small class="error"><%= errors.category %></small><% } %>
+          <!-- Description -->
+          <label for="description">Description:</label>
+          <textarea id="description" name="description"></textarea>
 
-      <label for="description">Description:</label>
-      <textarea id="description" name="description"></textarea>
-<!-- Reference URL -->
-      <label for="referenceUrl">Reference URL:</label>
-      <input type="url" id="referenceUrl" name="referenceUrl" />
-      <% if (errors && errors.referenceUrl) { %><small class="error"><%= errors.referenceUrl %></small><% } %>
+          <!-- Reference URL -->
+          <label for="referenceUrl">Reference URL:</label>
+          <input type="url" id="referenceUrl" name="referenceUrl" />
+          <% if (errors && errors.referenceUrl) { %><small class="error"><%= errors.referenceUrl %></small><% } %>
 
-      <button type="submit">Create Form</button>
-    </form>
+          <button type="submit">Create Form</button>
+        </form>
+      </section>
 
-     
-    
-     <!--
-      Script A — Autofill "Form Name" when a user picks from the "Choose existing form" dropdown.
-      Purpose: saves typing; if they select an existing name, we copy it into the Name input.
-      Safe: does not change any HTML attributes or layout; only runs on dropdown change.
-    -->
-    <script>
-      (function(){
-        var select = document.getElementById('nameSelect');
-        var nameInput = document.getElementById('name');
-        if (!select || !nameInput) return; // guard if elements aren’t on this page
+      <!-- RIGHT: Reference (scrolls to match left height) -->
+      <section class="new-right">
+        <h2>Rank Progression Reference</h2>
 
-        select.addEventListener('change', function () {
-          // If user picks a value, copy it into the text input; otherwise clear the input.
-          nameInput.value = this.value || '';
-        });
-      })();
-    </script>
+        <!-- This inner container will be height-synced to the left column by main.js -->
+        <div id="ref-scroll" class="ref-scroll">
+          <!-- Chart (data-* read by /public/js/main.js) -->
+          <div class="chart-wrap">
+            <canvas
+              id="rankChart"
+              width="640"
+              height="200"
+              data-labels='<%- JSON.stringify(chartLabels || []) %>'
+              data-counts='<%- JSON.stringify(chartCounts || []) %>'>
+            </canvas>
+          </div>
 
-    <!--
-      Script B — Repopulate fields after a server-side validation error.
-      Purpose: when Mongoose validation fails, your POST route re-renders this page
-               and includes `formData` (what the user tried to submit).
-               This script reads `formData` and puts those values back into the inputs,
-               so the user doesn't have to retype everything.
+          <div class="req-grid">
+            <!-- KYU requirements WITH belt chip column -->
+            <div>
+              <h3>Kyu Requirements (Forms)</h3>
+              <table class="req-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Belt</th> <!-- chip column -->
+                    <th>Forms</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% Object.keys(kyuRequirements || {})
+                       .sort((a,b)=>Number(b)-Number(a))
+                       .forEach(n => { %>
+                    <tr>
+                      <td><strong>KYU <%= n %></strong></td>
+                      <td>
+                        <!-- Chip class from server via kyuChipMap[n] -->
+                        <span class="belt-chip <%= (kyuChipMap || {})[n] || '' %>"></span>
+                      </td>
+                      <td>
+                        <ul class="req-list">
+                          <% (kyuRequirements[n] || []).forEach(item => { %>
+                            <li><%= item %></li>
+                          <% }) %>
+                        </ul>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
 
-      Notes:
-        - This does NOT change your HTML attributes or layout.
-        - It runs only if the server set a non-empty `formData` object.
-        - This version expects your rankType option values to be LOWERCASE ("kyu"/"dan"),
-          which matches your current markup. If you later switch to "Kyu"/"Dan",
-          change the marked line below.
-    -->
-    <script>
-  // Script B — Repopulate fields after a server-side validation error
-  // Now that your <option> values are "Kyu"/"Dan", set the value directly.
-  (function (d) {
-    var data = <%- JSON.stringify(formData || {}) %>;
-    if (!data || !Object.keys(data).length) return; // nothing to repopulate
-
-    if (data.name != null) d.getElementById('name').value = data.name;
-    if (data.rankType != null) d.getElementById('rankType').value = data.rankType; // "Kyu"/"Dan"
-    if (data.rankNumber != null) d.getElementById('rankNumber').value = data.rankNumber;
-    if (data.beltColor != null) d.getElementById('beltColor').value = data.beltColor;
-    if (data.category != null) d.getElementById('category').value = data.category;
-    if (data.referenceUrl != null) d.getElementById('referenceUrl').value = data.referenceUrl;
-    if (typeof data.description === 'string') d.getElementById('description').value = data.description;
-  })(document);
-</script>
+            <!-- DAN requirements -->
+            <div>
+              <h3>Dan Requirements (Forms)</h3>
+              <table class="req-table">
+                <thead><tr><th>Degree</th><th>Forms</th></tr></thead>
+                <tbody>
+                  <% Object.keys(danRequirements || {})
+                       .sort((a,b)=>Number(a)-Number(b))
+                       .forEach(n => { %>
+                    <tr>
+                      <td><strong>DAN <%= n %></strong></td>
+                      <td>
+                        <ul class="req-list">
+                          <% (danRequirements[n] || []).forEach(item => { %>
+                            <li><%= item %></li>
+                          <% }) %>
+                        </ul>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <%- include('partials/footer') %>
   </body>

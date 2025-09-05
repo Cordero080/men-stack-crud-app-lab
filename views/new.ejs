@@ -1,11 +1,10 @@
 <!-- views/new.ejs -->
-<!-- Purpose: “New” form page; two-column layout with CREATE form (left) and reference (right). -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <%- include('partials/head') %>
-    <!-- Chart / reference panel styles -->
     <link rel="stylesheet" href="/css/chart.css">
+    <link rel="stylesheet" href="/css/scroll.css"><!-- combobox + chart scroll styles -->
   </head>
 
   <body class="page-new">
@@ -17,101 +16,127 @@
       <p class="error"><%= error %></p>
     <% } %>
 
-    <!-- ===== Two-column layout ===== -->
     <div class="new-layout">
       <!-- LEFT: Create Form -->
       <section class="new-left">
-        <form action="/forms" method="POST">
-          <!-- Existing names helper -->
-          <label class="input" for="nameSelect">Choose existing form :</label>
-          <select id="nameSelect" name="nameSelect">
-            <option value="">-- choose or type below --</option>
-            <% (names || []).forEach(n => { %>
-              <option value="<%= n %>"><%= n %></option>
-            <% }) %>
-          </select>
-
-          <!-- Name -->
-          <label for="name">Form/Kata Name:</label>
-          <input type="text" id="name" name="name" required />
-          <% if (errors && errors.name) { %><small class="error"><%= errors.name %></small><% } %>
+        <form action="/forms" method="POST" autocomplete="off">
+          <!-- Name (custom combobox: type-to-filter + click arrow to open list) -->
+          <label class="input" for="name">Choose form name:</label>
+          <div
+            class="combo"
+            data-source='<%- JSON.stringify(availableNames || []) %>'>
+            <input
+              id="name"
+              name="name"
+              required
+              placeholder="Start typing…"
+              value="<%= (formData && formData.name) ? formData.name : '' %>"
+              aria-autocomplete="list"
+              aria-controls="name-list"
+              aria-expanded="false"
+              role="combobox"
+              autocomplete="off"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
+            />
+            <button
+              type="button"
+              class="combo-toggle"
+              aria-label="Show options"
+              aria-controls="name-list"
+              aria-expanded="false">▾</button>
+            <ul id="name-list" class="combo-list" role="listbox" hidden></ul>
+          </div>
+          <% if (errors && errors.name) { %>
+            <small class="error"><%= errors.name %></small>
+          <% } %>
 
           <!-- Rank Type -->
           <label for="rankType">Rank Type:</label>
           <select id="rankType" name="rankType" required>
-            <option value="Kyu">Kyu/Level</option>
-            <option value="Dan">Dan/Degree</option>
+            <option value="Kyu" <%= (formData && formData.rankType === 'Kyu') ? 'selected' : '' %>>Kyu</option>
+            <option value="Dan" <%= (formData && formData.rankType === 'Dan') ? 'selected' : '' %>>Dan</option>
           </select>
           <% if (errors && errors.rankType) { %><small class="error"><%= errors.rankType %></small><% } %>
 
           <!-- Rank Number -->
           <label for="rankNumber">Rank Number:</label>
-          <input type="number" id="rankNumber" name="rankNumber" min="1" required />
+          <input
+            type="number"
+            id="rankNumber"
+            name="rankNumber"
+            min="1"
+            required
+            value="<%= (formData && formData.rankNumber) ? formData.rankNumber : '' %>"
+          />
           <% if (errors && errors.rankNumber) { %><small class="error"><%= errors.rankNumber %></small><% } %>
 
-          <!-- Belt Color (label tints via main.js) -->
+          <!-- Belt Color -->
           <label for="beltColor" id="beltLabel">Belt Color</label>
           <select id="beltColor" name="beltColor">
-            <option value="white">White</option>
-            <option value="orange">Orange</option>
-            <option value="green">Green</option>
-            <option value="purple">Purple</option>
-            <option value="brown">Brown</option>
-            <option value="black">Black</option>
+            <option value="white"  <%= (formData && formData.beltColor==='white')  ? 'selected' : '' %>>White</option>
+            <option value="orange" <%= (formData && formData.beltColor==='orange') ? 'selected' : '' %>>Orange</option>
+            <option value="green"  <%= (formData && formData.beltColor==='green')  ? 'selected' : '' %>>Green</option>
+            <option value="purple" <%= (formData && formData.beltColor==='purple') ? 'selected' : '' %>>Purple</option>
+            <option value="brown"  <%= (formData && formData.beltColor==='brown')  ? 'selected' : '' %>>Brown</option>
+            <option value="black"  <%= (formData && formData.beltColor==='black')  ? 'selected' : '' %>>Black</option>
           </select>
 
           <!-- Category -->
           <label for="category">Category:</label>
           <select id="category" name="category">
-            <option value="Kata">Kata</option>
-            <option value="Bunkai">Bunkai</option>
-            <option value="Kumite">Kumite</option>
-            <option value="Weapon">Weapon</option>
-            <option value="Other">Other</option>
+            <option value="Kata"         <%= (formData && formData.category==='Kata')         ? 'selected' : '' %>>Kata</option>
+            <option value="Bunkai"       <%= (formData && formData.category==='Bunkai')       ? 'selected' : '' %>>Bunkai</option>
+            <option value="Kiso Kumite"  <%= (formData && formData.category==='Kiso Kumite')  ? 'selected' : '' %>>Kiso Kumite</option>
+            <option value="Weapon"       <%= (formData && formData.category==='Weapon')       ? 'selected' : '' %>>Weapon</option>
+            <option value="Other"        <%= (formData && formData.category==='Other')        ? 'selected' : '' %>>Other</option>
           </select>
           <% if (errors && errors.category) { %><small class="error"><%= errors.category %></small><% } %>
 
           <!-- Description -->
           <label for="description">Description:</label>
-          <textarea id="description" name="description"></textarea>
+          <textarea id="description" name="description"><%= (formData && formData.description) ? formData.description : '' %></textarea>
 
           <!-- Reference URL -->
           <label for="referenceUrl">Reference URL:</label>
-          <input type="url" id="referenceUrl" name="referenceUrl" />
+          <input
+            type="url"
+            id="referenceUrl"
+            name="referenceUrl"
+            value="<%= (formData && formData.referenceUrl) ? formData.referenceUrl : '' %>"
+          />
           <% if (errors && errors.referenceUrl) { %><small class="error"><%= errors.referenceUrl %></small><% } %>
 
           <button type="submit">Create Form</button>
         </form>
       </section>
 
-      <!-- RIGHT: Reference (scrolls to match left height) -->
+      <!-- RIGHT: Reference (chart + requirements) -->
       <section class="new-right">
         <h2>Rank Progression Reference</h2>
-
-        <!-- This inner container will be height-synced to the left column by main.js -->
         <div id="ref-scroll" class="ref-scroll">
-          <!-- Chart (data-* read by /public/js/main.js) -->
           <div class="chart-wrap">
-            <canvas
-              id="rankChart"
-              width="640"
-              height="200"
-              data-labels='<%- JSON.stringify(chartLabels || []) %>'
-              data-counts='<%- JSON.stringify(chartCounts || []) %>'>
-            </canvas>
+            <!-- Keep bar widths; allow sideways scroll on narrow screens -->
+            <div class="chart-scroll">
+              <div class="chart-scroll-inner">
+                <canvas
+                  id="rankChart"
+                  width="640"
+                  height="200"
+                  data-labels='<%- JSON.stringify(chartLabels || []) %>'
+                  data-counts='<%- JSON.stringify(chartCounts || []) %>'>
+                </canvas>
+              </div>
+            </div>
           </div>
 
           <div class="req-grid">
-            <!-- KYU requirements WITH belt chip column -->
             <div>
               <h3>Kyu Requirements (Forms)</h3>
               <table class="req-table">
                 <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Belt</th> <!-- chip column -->
-                    <th>Forms</th>
-                  </tr>
+                  <tr><th>Rank</th><th>Belt</th><th>Forms</th></tr>
                 </thead>
                 <tbody>
                   <% Object.keys(kyuRequirements || {})
@@ -119,10 +144,7 @@
                        .forEach(n => { %>
                     <tr>
                       <td><strong>KYU <%= n %></strong></td>
-                      <td>
-                        <!-- Chip class from server via kyuChipMap[n] -->
-                        <span class="belt-chip <%= (kyuChipMap || {})[n] || '' %>"></span>
-                      </td>
+                      <td><span class="belt-chip <%= (kyuChipMap || {})[n] || '' %>"></span></td>
                       <td>
                         <ul class="req-list">
                           <% (kyuRequirements[n] || []).forEach(item => { %>
@@ -136,7 +158,6 @@
               </table>
             </div>
 
-            <!-- DAN requirements -->
             <div>
               <h3>Dan Requirements (Forms)</h3>
               <table class="req-table">
@@ -165,5 +186,9 @@
     </div>
 
     <%- include('partials/footer') %>
+
+    <!-- Scripts (load once, at the end) -->
+    <script src="/js/main.js"></script>
+    <script src="/js/scroll-combo.js"></script>
   </body>
 </html>
